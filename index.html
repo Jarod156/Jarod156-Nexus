@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0b1f3a">
+<title>NEXUS V1</title>
+<style>
+:root{
+  --navy:#0b1f3a;--navy2:#14395f;--bg:#eaf0f6;--line:#d5dee8;
+  --blue:#1767c8;--orange:#d88422;--red:#d84d4d;--green:#2f9d62;
+  --text:#14263b;--muted:#66798d;--white:#fff
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;font-family:Arial,Segoe UI,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+body{overflow:hidden}
+.app{height:100%;display:grid;grid-template-rows:58px minmax(0,1fr) 50px}
+header{
+  background:linear-gradient(90deg,var(--navy),var(--navy2));color:#fff;
+  display:flex;align-items:center;justify-content:space-between;padding:0 14px;gap:14px
+}
+.brand{font-size:22px;font-weight:900;white-space:nowrap}
+.headerRight{display:flex;align-items:center;gap:14px}
+.weather{display:flex;align-items:center;gap:7px;font-weight:700}
+.weather small,.clock small{display:block;color:#c9d6e3;font-size:10px;font-weight:400}
+.clock{text-align:right;font-weight:800}
+.topBtn{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:9px;height:36px;padding:0 11px;font-weight:800}
+main{min-height:0;display:grid;grid-template-columns:40fr 30fr 30fr;gap:7px;padding:7px}
+.panel{
+  min-width:0;min-height:0;background:#fff;border:1px solid var(--line);border-radius:10px;
+  overflow:hidden;display:grid;grid-template-rows:38px 40px minmax(0,1fr) 42px;
+  box-shadow:0 3px 10px rgba(16,37,60,.08)
+}
+.panelTitle{color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 11px;font-size:15px;font-weight:900}
+.tech .panelTitle{background:var(--blue)} .events .panelTitle{background:var(--orange)} .piquet .panelTitle{background:var(--red)}
+.monthbar{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;border-bottom:1px solid var(--line);background:#f8fafc}
+.monthbar button{height:100%;border:0;background:transparent;font-size:22px;font-weight:900;color:#203850}
+.monthbar strong{text-align:center;text-transform:capitalize;font-size:14px}
+.viewer{min-height:0;position:relative;background:#f4f7fa}
+.viewer iframe{width:100%;height:100%;border:0;background:#fff}
+.empty{height:100%;display:grid;place-items:center;text-align:center;padding:20px;color:var(--muted);font-size:14px}
+.empty b{display:block;color:var(--text);font-size:16px;margin-bottom:6px}
+.panelActions{display:flex;gap:6px;align-items:center;padding:5px 7px;border-top:1px solid var(--line);background:#fff}
+.panelActions button,.uploadLabel{
+  height:31px;border:0;border-radius:8px;padding:0 9px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center
+}
+.uploadLabel{background:#edf3fb;color:#164d83}
+.panelActions button{background:#f0f3f6;color:#294258}
+.panelActions .danger{margin-left:auto;background:#fdeeee;color:#a12b2b}
+input[type=file]{display:none}
+footer{margin:0 7px 7px;background:#fff;border:1px solid var(--line);border-radius:9px;display:grid;grid-template-columns:115px 1fr;align-items:center;overflow:hidden}
+footer strong{height:100%;display:flex;align-items:center;padding:0 12px;background:#102f51;color:white}
+.ticker{white-space:nowrap;overflow:hidden;padding-left:10px;font-weight:800}
+.ticker span{display:inline-block;animation:scroll 26s linear infinite}
+@keyframes scroll{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+.modal{position:fixed;inset:0;background:rgba(6,18,31,.84);display:none;z-index:20;padding:18px}
+.modal.open{display:grid;place-items:center}
+.dialog{width:min(980px,96vw);height:min(760px,94vh);background:#fff;border-radius:16px;overflow:hidden;display:grid;grid-template-rows:56px minmax(0,1fr)}
+.dialogHead{display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--navy);color:#fff}
+.dialogHead h2{margin:0;font-size:18px}
+.closeBtn{border:0;background:rgba(255,255,255,.15);color:#fff;border-radius:9px;padding:8px 11px;font-weight:900}
+.adminBody{padding:16px;overflow:auto}
+.adminGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.adminCard{border:1px solid var(--line);border-radius:12px;padding:13px}
+.adminCard h3{margin:0 0 10px}
+.adminCard label{display:block;font-size:12px;font-weight:800;color:#53677c;margin:9px 0 5px}
+.adminCard select,.adminCard textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px;background:#fff}
+.adminCard textarea{min-height:90px;resize:vertical}
+.saveBtn{margin-top:10px;border:0;background:var(--blue);color:#fff;padding:10px 13px;border-radius:9px;font-weight:900}
+.fullViewer{width:100%;height:100%;background:#fff}
+.fullViewer iframe{width:100%;height:100%;border:0}
+@media(max-width:900px){
+  body{overflow:auto}
+  .app{height:auto;min-height:100%;grid-template-rows:auto auto auto}
+  header{min-height:66px;flex-wrap:wrap;padding:7px 10px}
+  main{grid-template-columns:1fr}
+  .panel{height:620px}
+  .adminGrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand">NEXUS · Centre Technique</div>
+  <div class="headerRight">
+    <div class="weather"><span id="weatherIcon">⛅</span><div><span id="weatherText">Météo…</span><small>Lausanne</small></div></div>
+    <div class="clock"><span id="time">--:--</span><small id="date">--</small></div>
+    <button class="topBtn" id="adminBtn">⚙ Administration</button>
+    <button class="topBtn" id="fullscreenBtn">⛶ Plein écran</button>
+  </div>
+</header>
+
+<main>
+  <section class="panel tech" data-category="technique" data-offset="0">
+    <div class="panelTitle"><span>🔧 Planning Technique</span><span class="status">—</span></div>
+    <div class="monthbar"><button class="prev">‹</button><strong class="month"></strong><button class="next">›</button></div>
+    <div class="viewer"></div>
+    <div class="panelActions">
+      <label class="uploadLabel">＋ Ajouter PDF<input class="fileInput" type="file" accept="application/pdf"></label>
+      <button class="zoomBtn">Agrandir</button>
+      <button class="danger deleteBtn">Supprimer</button>
+    </div>
+  </section>
+
+  <section class="panel events" data-category="events" data-offset="0">
+    <div class="panelTitle"><span>🎪 Planning Events</span><span class="status">—</span></div>
+    <div class="monthbar"><button class="prev">‹</button><strong class="month"></strong><button class="next">›</button></div>
+    <div class="viewer"></div>
+    <div class="panelActions">
+      <label class="uploadLabel">＋ Ajouter PDF<input class="fileInput" type="file" accept="application/pdf"></label>
+      <button class="zoomBtn">Agrandir</button>
+      <button class="danger deleteBtn">Supprimer</button>
+    </div>
+  </section>
+
+  <section class="panel piquet" data-category="piquet" data-offset="0">
+    <div class="panelTitle"><span>🚨 Planning Piquet</span><span class="status">—</span></div>
+    <div class="monthbar"><button class="prev">‹</button><strong class="month"></strong><button class="next">›</button></div>
+    <div class="viewer"></div>
+    <div class="panelActions">
+      <label class="uploadLabel">＋ Ajouter PDF<input class="fileInput" type="file" accept="application/pdf"></label>
+      <button class="zoomBtn">Agrandir</button>
+      <button class="danger deleteBtn">Supprimer</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <strong>Informations</strong>
+  <div class="ticker"><span id="tickerText">Bienvenue dans NEXUS · Ajoutez les PDF du mois depuis chaque planning ·</span></div>
+</footer>
+</div>
+
+<div class="modal" id="adminModal">
+  <div class="dialog">
+    <div class="dialogHead"><h2>Administration NEXUS</h2><button class="closeBtn" data-close="adminModal">Fermer</button></div>
+    <div class="adminBody">
+      <div class="adminGrid">
+        <div class="adminCard">
+          <h3>📢 Bandeau d'informations</h3>
+          <label>Message affiché en bas de l'écran</label>
+          <textarea id="tickerInput"></textarea>
+          <button class="saveBtn" id="saveTicker">Enregistrer</button>
+        </div>
+        <div class="adminCard">
+          <h3>📅 Navigation rapide</h3>
+          <label>Choisir un mois pour les 3 plannings</label>
+          <select id="quickMonth"></select>
+          <label>Année</label>
+          <select id="quickYear"></select>
+          <button class="saveBtn" id="applyMonth">Afficher ce mois</button>
+        </div>
+        <div class="adminCard">
+          <h3>💾 Stockage</h3>
+          <p style="color:#66798d;font-size:13px;line-height:1.45">
+            Les PDF sont enregistrés dans le navigateur de cet appareil.
+            Ils restent disponibles après fermeture et redémarrage.
+          </p>
+          <button class="saveBtn" id="exportBtn">Exporter une sauvegarde</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="viewerModal">
+  <div class="dialog">
+    <div class="dialogHead"><h2 id="viewerTitle">Planning</h2><button class="closeBtn" data-close="viewerModal">Fermer</button></div>
+    <div class="fullViewer"><iframe id="fullFrame"></iframe></div>
+  </div>
+</div>
+
+<script>
+const DB='nexus-v1-db', STORE='pdfs';
+let db, documents=[], objectUrls={};
+const monthFmt=new Intl.DateTimeFormat('fr-CH',{month:'long',year:'numeric'});
+const months=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+function openDB(){
+  return new Promise((resolve,reject)=>{
+    const r=indexedDB.open(DB,1);
+    r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE,{keyPath:'id'})};
+    r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);
+  });
+}
+function tx(mode='readonly'){return db.transaction(STORE,mode).objectStore(STORE)}
+function getAll(){return new Promise((res,rej)=>{const r=tx().getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error)})}
+function put(doc){return new Promise((res,rej)=>{const r=tx('readwrite').put(doc);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function del(id){return new Promise((res,rej)=>{const r=tx('readwrite').delete(id);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function id(){return crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random()}
+function keyForDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
+function selectedDate(panel){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+Number(panel.dataset.offset||0));return d}
+function docFor(panel){const d=selectedDate(panel);return documents.find(x=>x.category===panel.dataset.category&&x.monthKey===keyForDate(d))}
+function urlFor(doc){if(!objectUrls[doc.id])objectUrls[doc.id]=URL.createObjectURL(doc.blob);return objectUrls[doc.id]}
+function emptyHtml(){return '<div class="empty"><div><b>Aucun PDF pour ce mois</b>Appuyez sur « Ajouter PDF ».</div></div>'}
+function renderPanel(panel){
+  const d=selectedDate(panel), doc=docFor(panel), viewer=panel.querySelector('.viewer');
+  panel.querySelector('.month').textContent=monthFmt.format(d);
+  panel.querySelector('.status').textContent=doc?'PDF actif':'Aucun PDF';
+  viewer.innerHTML=doc?`<iframe title="${doc.name}" src="${urlFor(doc)}#toolbar=0&navpanes=0&view=FitH"></iframe>`:emptyHtml();
+  panel.querySelector('.zoomBtn').disabled=!doc;
+  panel.querySelector('.deleteBtn').disabled=!doc;
+}
+function render(){document.querySelectorAll('.panel').forEach(renderPanel)}
+async function refresh(){documents=await getAll();render()}
+async function addPdf(panel,file){
+  if(!file||file.type!=='application/pdf'){alert('Merci de choisir un fichier PDF.');return}
+  const d=selectedDate(panel), existing=docFor(panel);
+  if(existing) await del(existing.id);
+  await put({id:id(),category:panel.dataset.category,monthKey:keyForDate(d),name:file.name,createdAt:new Date().toISOString(),blob:file});
+  await refresh();
+}
+document.querySelectorAll('.panel').forEach(panel=>{
+  panel.querySelector('.prev').onclick=()=>{panel.dataset.offset=Number(panel.dataset.offset)-1;renderPanel(panel)};
+  panel.querySelector('.next').onclick=()=>{panel.dataset.offset=Number(panel.dataset.offset)+1;renderPanel(panel)};
+  panel.querySelector('.fileInput').onchange=async e=>{await addPdf(panel,e.target.files[0]);e.target.value=''};
+  panel.querySelector('.deleteBtn').onclick=async()=>{
+    const doc=docFor(panel);if(doc&&confirm('Supprimer ce PDF ?')){await del(doc.id);await refresh()}
+  };
+  panel.querySelector('.zoomBtn').onclick=()=>{
+    const doc=docFor(panel);if(!doc)return;
+    viewerTitle.textContent=doc.name;fullFrame.src=urlFor(doc)+'#toolbar=1&navpanes=1&view=FitH';viewerModal.classList.add('open')
+  };
+  panel.querySelector('.viewer').ondblclick=()=>panel.querySelector('.zoomBtn').click();
+});
+
+function tick(){
+  const d=new Date();
+  time.textContent=d.toLocaleTimeString('fr-CH',{hour:'2-digit',minute:'2-digit'});
+  date.textContent=d.toLocaleDateString('fr-CH',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
+}
+tick();setInterval(tick,1000);
+
+const wc={0:['☀️','Dégagé'],1:['🌤️','Peu nuageux'],2:['⛅','Nuageux'],3:['☁️','Couvert'],45:['🌫️','Brouillard'],48:['🌫️','Brouillard'],51:['🌦️','Bruine'],53:['🌦️','Bruine'],55:['🌧️','Bruine forte'],61:['🌦️','Pluie'],63:['🌧️','Pluie'],65:['🌧️','Pluie forte'],71:['🌨️','Neige'],73:['🌨️','Neige'],75:['❄️','Neige forte'],80:['🌦️','Averses'],81:['🌧️','Averses'],82:['⛈️','Fortes averses'],95:['⛈️','Orage'],96:['⛈️','Orage'],99:['⛈️','Orage']};
+async function loadWeather(){
+  try{
+    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=46.5197&longitude=6.6323&current=temperature_2m,weather_code&timezone=Europe%2FZurich',{cache:'no-store'});
+    const j=await r.json(), c=j.current, i=wc[c.weather_code]||['🌡️','Météo'];
+    weatherIcon.textContent=i[0];weatherText.textContent=Math.round(c.temperature_2m)+'°C · '+i[1];
+  }catch{weatherText.textContent='Météo indisponible'}
+}
+loadWeather();setInterval(loadWeather,900000);
+
+fullscreenBtn.onclick=async()=>{
+  try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}
+  catch{alert('Utilisez F11 ou le mode kiosque du navigateur.')}
+};
+document.addEventListener('fullscreenchange',()=>fullscreenBtn.textContent=document.fullscreenElement?'✕ Quitter':'⛶ Plein écran');
+
+adminBtn.onclick=()=>adminModal.classList.add('open');
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.close).classList.remove('open'));
+document.querySelectorAll('.modal').forEach(m=>m.onclick=e=>{if(e.target===m)m.classList.remove('open')});
+
+const storedTicker=localStorage.getItem('nexus-ticker')||'Bienvenue dans NEXUS · Ajoutez les PDF du mois depuis chaque planning ·';
+tickerText.textContent=storedTicker;tickerInput.value=storedTicker;
+saveTicker.onclick=()=>{const v=tickerInput.value.trim()||'Bienvenue dans NEXUS';localStorage.setItem('nexus-ticker',v);tickerText.textContent=v;alert('Message enregistré.')};
+
+months.forEach((m,i)=>quickMonth.add(new Option(m[0].toUpperCase()+m.slice(1),i)));
+const cy=new Date().getFullYear();for(let y=cy-3;y<=cy+5;y++)quickYear.add(new Option(y,y));
+quickMonth.value=new Date().getMonth();quickYear.value=cy;
+applyMonth.onclick=()=>{
+  const target=new Date(Number(quickYear.value),Number(quickMonth.value),1), now=new Date();now.setDate(1);
+  const offset=(target.getFullYear()-now.getFullYear())*12+(target.getMonth()-now.getMonth());
+  document.querySelectorAll('.panel').forEach(p=>p.dataset.offset=offset);
+  render();adminModal.classList.remove('open');
+};
+
+exportBtn.onclick=()=>{
+  const meta=documents.map(({blob,...x})=>x);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(meta,null,2)],{type:'application/json'}));
+  a.download='nexus-sauvegarde-index.json';a.click();
+};
+
+(async()=>{db=await openDB();await refresh()})();
+</script>
+</body>
+</html>
