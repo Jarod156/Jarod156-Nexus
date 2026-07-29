@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>NEXUS</title>
+  <style>
+    :root{
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color:#172033;
+      background:#eef2f7;
+      --muted:#667085;
+      --line:#e3e8ef;
+      --surface:rgba(255,255,255,.96);
+      --shadow:0 16px 42px rgba(15,23,42,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-width:320px;min-height:100vh;
+      background:
+        radial-gradient(circle at 88% 8%, rgba(70,133,232,.12), transparent 28rem),
+        linear-gradient(180deg,#f8fafc 0%,#eef2f7 100%);
+    }
+    button,input,select{font:inherit}
+    button{-webkit-tap-highlight-color:transparent}
+    button:focus-visible,input:focus-visible,select:focus-visible{
+      outline:3px solid rgba(46,111,223,.28);outline-offset:2px
+    }
+    .app{min-height:100vh;display:flex;flex-direction:column}
+    .topbar{
+      min-height:98px;padding:14px clamp(22px,3vw,56px);
+      display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px;
+      color:#fff;background:rgba(15,23,42,.97);
+      border-bottom:1px solid rgba(255,255,255,.08);
+      position:sticky;top:0;z-index:20
+    }
+    .brand{display:flex;align-items:center;gap:14px}
+    .brand-mark{
+      width:56px;height:56px;display:grid;place-items:center;border-radius:18px;
+      background:linear-gradient(145deg,#2f73dd,#76aaff);
+      color:#fff;font-weight:900;font-size:25px;
+      box-shadow:0 10px 26px rgba(47,115,221,.36)
+    }
+    .brand-name{font-size:24px;font-weight:900;letter-spacing:.14em;line-height:1}
+    .brand-subtitle{color:#aeb9ca;font-size:13px;margin-top:6px}
+    .topbar-center{display:flex;align-items:center;gap:14px}
+    .clock,.weather{
+      min-height:60px;display:flex;align-items:center;gap:11px;padding:9px 16px;
+      border:1px solid rgba(255,255,255,.1);border-radius:17px;
+      background:rgba(255,255,255,.055)
+    }
+    .clock{flex-direction:column;align-items:flex-end;justify-content:center;gap:1px}
+    .clock strong{font-size:22px}.clock span,.weather small{color:#b8c2d0;font-size:12px}
+    .weather>span{font-size:28px}.weather div{display:flex;flex-direction:column}.weather strong{font-size:18px}
+    .topbar-actions{justify-self:end;display:flex;align-items:center;gap:14px}
+    .sync{display:flex;align-items:center;gap:9px;color:#cfe8d8;font-size:13px;font-weight:700}
+    .sync span,.status span{
+      width:9px;height:9px;border-radius:50%;background:#31c46c;
+      box-shadow:0 0 0 4px rgba(49,196,108,.12)
+    }
+    .primary,.secondary{
+      min-height:52px;border:0;border-radius:15px;padding:0 21px;font-weight:800;cursor:pointer
+    }
+    .primary{color:#fff;background:#2e6fdf;box-shadow:0 8px 22px rgba(46,111,223,.25)}
+    .primary:hover{background:#255fc4}.primary:disabled{opacity:.48;cursor:not-allowed}
+    .secondary{color:#344054;background:#edf1f6}
+    main{width:min(1620px,100%);margin:0 auto;padding:clamp(24px,2.6vw,46px);flex:1}
+    .welcome{margin-bottom:26px}.eyebrow{color:#667085;font-size:12px;font-weight:850;letter-spacing:.14em}
+    h1,h2,h3,p{margin-top:0}h1{margin:7px 0 6px;font-size:clamp(34px,3vw,50px);letter-spacing:-.045em}
+    .welcome p{color:var(--muted);font-size:17px;margin-bottom:0}
+    .section-heading,.panel-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:18px}
+    .section-heading{margin-bottom:16px}
+    .section-heading h2,.panel-heading h2{margin:4px 0 0;font-size:clamp(23px,2vw,30px);letter-spacing:-.03em}
+    .text-button{border:0;background:transparent;color:#2e6fdf;font-weight:800;padding:13px;cursor:pointer}
+    .wall-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(420px,.65fr);gap:22px}
+    .feature,.secondary-card{
+      border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow);
+      cursor:pointer;text-align:left;transition:transform .18s ease,box-shadow .18s ease
+    }
+    .feature:hover,.secondary-card:hover{transform:translateY(-3px);box-shadow:0 22px 52px rgba(15,23,42,.12)}
+    .feature:active,.secondary-card:active{transform:scale(.99)}
+    .accent-blue{--accent:#3478e5;--tint:#eaf2ff}
+    .accent-violet{--accent:#8957da;--tint:#f3edff}
+    .accent-orange{--accent:#ea8a2f;--tint:#fff3e7}
+    .feature{
+      min-height:390px;border-radius:28px;padding:28px;display:flex;flex-direction:column;
+      position:relative;overflow:hidden
+    }
+    .feature::after{
+      content:"";position:absolute;width:280px;height:280px;right:-90px;top:-110px;border-radius:50%;
+      background:radial-gradient(circle,rgba(52,120,229,.15),transparent 68%)
+    }
+    .feature-header{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+    .planning-icon{width:70px;height:70px;display:grid;place-items:center;border-radius:21px;background:var(--tint);font-size:34px}
+    .status{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:999px;color:#34704b;background:#edf8f1;font-size:12px;font-weight:800}
+    .feature-body{margin:34px 0 auto;position:relative;z-index:1}
+    .kicker{color:var(--accent);font-size:12px;font-weight:900;letter-spacing:.12em}
+    .feature-body h3{font-size:clamp(30px,3vw,47px);margin:10px 0 4px;letter-spacing:-.045em}
+    .month{color:var(--accent);font-size:23px;font-weight:850;margin-bottom:18px}
+    .summary{max-width:620px;color:var(--muted);font-size:16px;line-height:1.5}
+    .feature-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:20px;margin-top:28px;position:relative;z-index:1}
+    .feature-footer div{display:flex;flex-direction:column;gap:4px}
+    .feature-footer strong{font-size:14px}.feature-footer div span{color:var(--muted);font-size:12px}
+    .open-chip{min-height:46px;display:inline-flex;align-items:center;padding:0 17px;border-radius:13px;color:#fff;background:var(--accent);font-weight:850}
+    .secondary-stack{display:grid;grid-template-rows:1fr 1fr;gap:22px}
+    .secondary-card{
+      min-height:184px;border-radius:25px;padding:22px;
+      display:grid;grid-template-columns:58px 1fr auto;align-items:center;gap:17px;
+      position:relative;overflow:hidden
+    }
+    .secondary-card::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:var(--accent)}
+    .secondary-icon{width:58px;height:58px;display:grid;place-items:center;border-radius:18px;background:var(--tint);font-size:27px}
+    .secondary-copy h3{font-size:23px;margin:6px 0 8px;letter-spacing:-.03em}
+    .secondary-copy p{color:var(--muted);font-size:13px;margin-bottom:15px}
+    .meta{display:flex;gap:9px;flex-wrap:wrap}
+    .meta span{padding:6px 8px;border-radius:8px;background:#f3f5f8;color:#596579;font-size:11px;font-weight:700}
+    .arrow{color:var(--accent);font-size:24px;font-weight:900}
+    .lower-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:22px;margin-top:24px}
+    .panel{background:var(--surface);border:1px solid var(--line);border-radius:25px;padding:24px;box-shadow:0 10px 30px rgba(15,23,42,.055)}
+    .activity-list{margin-top:12px}
+    .activity-item{display:grid;grid-template-columns:46px 1fr auto;gap:13px;align-items:center;padding:15px 0;border-bottom:1px solid #edf0f4}
+    .activity-item:last-child{border-bottom:0}
+    .activity-icon{width:44px;height:44px;display:grid;place-items:center;background:#f1f5fa;border-radius:14px;font-size:20px}
+    .activity-item div{display:flex;flex-direction:column;gap:4px}.activity-item strong{font-size:14px}
+    .activity-item div span,.activity-item time{color:var(--muted);font-size:12px}
+    .shortcut-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+    .shortcut{
+      min-height:88px;display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:11px;
+      border:1px solid var(--line);background:#fafbfd;border-radius:17px;padding:13px;text-align:left;cursor:pointer
+    }
+    .shortcut:hover{background:#fff;border-color:#cbd5e1}
+    .shortcut-icon{width:43px;height:43px;display:grid;place-items:center;border-radius:13px;background:#fff;font-size:21px;box-shadow:0 4px 12px rgba(16,24,40,.06)}
+    .shortcut-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+    .shortcut-copy strong{font-size:14px}.shortcut-copy small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    footer{display:flex;justify-content:space-between;gap:18px;color:#8390a4;padding:18px clamp(22px,3vw,56px);border-top:1px solid var(--line);font-size:12px}
+    .modal-backdrop{
+      position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:20px;
+      background:rgba(9,17,31,.68);backdrop-filter:blur(9px)
+    }
+    .hidden{display:none!important}
+    .viewer,.upload{
+      width:min(1180px,100%);max-height:calc(100vh - 40px);display:flex;flex-direction:column;
+      background:#fff;border-radius:25px;overflow:hidden;box-shadow:0 30px 100px rgba(0,0,0,.28)
+    }
+    .upload{width:min(680px,100%)}
+    .viewer-header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:22px 25px;border-bottom:1px solid var(--line)}
+    .viewer-header h2{margin:5px 0 4px}.viewer-header p{color:var(--muted);margin:0}
+    .icon-button{width:50px;height:50px;border:0;border-radius:15px;background:#f0f3f7;font-size:28px;cursor:pointer}
+    .viewer-content{min-height:min(720px,72vh);background:#e8edf3}
+    .viewer-content iframe{width:100%;height:min(720px,72vh);border:0}
+    .empty-viewer{height:min(720px,72vh);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
+    .empty-viewer>span{font-size:62px}.empty-viewer h3{margin:18px 0 7px;font-size:24px}.empty-viewer p{color:var(--muted)}
+    .form-body{display:grid;gap:18px;padding:24px}
+    .form-body label{display:grid;gap:8px;color:#344054;font-weight:700;font-size:13px}
+    .form-body select,.form-body input{min-height:52px;border:1px solid #ccd4df;border-radius:13px;padding:0 14px;background:#fff;color:#172033}
+    .drop-zone{min-height:185px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border:2px dashed #b8c4d3;border-radius:18px;background:#f7f9fc;color:#344054;cursor:pointer}
+    .drop-zone.dragging{border-color:#2e6fdf;background:#edf4ff}
+    .drop-zone small{color:var(--muted)}
+    .drop-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:#fff;color:#2e6fdf;font-size:25px;box-shadow:0 5px 15px rgba(16,24,40,.08);margin-bottom:5px}
+    .modal-actions{display:flex;justify-content:flex-end;gap:11px;padding:18px 24px;border-top:1px solid var(--line)}
+    @media(max-width:1100px){
+      .topbar{grid-template-columns:1fr auto}.topbar-center{display:none}
+      .wall-grid{grid-template-columns:1fr}.secondary-stack{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+    }
+    @media(max-width:780px){
+      .sync{display:none}.lower-grid{grid-template-columns:1fr}.secondary-stack{grid-template-columns:1fr}.shortcut-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:620px){
+      .topbar{min-height:76px;padding:12px 16px}.brand-mark{width:46px;height:46px;border-radius:14px}.brand-subtitle{display:none}
+      .primary{padding:0 14px}main{padding:22px 15px}.feature{min-height:330px;padding:21px}.planning-icon{width:58px;height:58px;font-size:29px}
+      .secondary-card{grid-template-columns:52px 1fr auto;padding:18px}footer span:last-child{display:none}
+      .modal-backdrop{padding:0}.viewer,.upload{width:100%;height:100%;max-height:none;border-radius:0}
+      .viewer-content,.viewer-content iframe,.empty-viewer{height:calc(100vh - 116px);max-height:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">N</div>
+        <div>
+          <div class="brand-name">NEXUS</div>
+          <div class="brand-subtitle">Espace technique collaboratif</div>
+        </div>
+      </div>
+
+      <div class="topbar-center">
+        <div class="clock">
+          <strong id="clockTime">--:--</strong>
+          <span id="clockDate">—</span>
+        </div>
+        <div class="weather">
+          <span>🌤️</span>
+          <div><strong>24°</strong><small>Lausanne</small></div>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <div class="sync"><span></span>Synchronisé</div>
+        <button class="primary" id="publishBtn">＋ Publier</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="welcome">
+        <span class="eyebrow">ÉQUIPE TECHNIQUE</span>
+        <h1 id="greeting">Bonjour 👋</h1>
+        <p>Les informations essentielles de l’équipe, visibles en permanence.</p>
+      </section>
+
+      <section>
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">TOUJOURS VISIBLES</span>
+            <h2>Plannings du mois</h2>
+          </div>
+          <button class="text-button">Voir les archives</button>
+        </div>
+
+        <div class="wall-grid">
+          <button class="feature accent-blue" data-open="technique">
+            <div class="feature-header">
+              <span class="planning-icon">🔧</span>
+              <span class="status"><span></span>À jour</span>
+            </div>
+            <div class="feature-body">
+              <span class="kicker">PLANNING PRINCIPAL</span>
+              <h3 id="technique-title">Planning technique</h3>
+              <p class="month" id="technique-month">Août 2026</p>
+              <p class="summary">Organisation mensuelle de l’équipe technique</p>
+            </div>
+            <div class="feature-footer">
+              <div>
+                <strong id="technique-version">Version 3</strong>
+                <span id="technique-author">Publié par Pino</span>
+              </div>
+              <span class="open-chip">Ouvrir →</span>
+            </div>
+          </button>
+
+          <div class="secondary-stack">
+            <button class="secondary-card accent-violet" data-open="events">
+              <div class="secondary-icon">🎟️</div>
+              <div class="secondary-copy">
+                <span class="kicker" id="events-month">Août 2026</span>
+                <h3>Planning événements</h3>
+                <p>Événements, montages et besoins techniques</p>
+                <div class="meta">
+                  <span id="events-version">Version 1</span>
+                  <span id="events-date">Hier, 16:40</span>
+                </div>
+              </div>
+              <span class="arrow">→</span>
+            </button>
+
+            <button class="secondary-card accent-orange" data-open="piquet">
+              <div class="secondary-icon">🛟</div>
+              <div class="secondary-copy">
+                <span class="kicker" id="piquet-month">Août 2026</span>
+                <h3>Planning piquet</h3>
+                <p>Permanences et technicien de service</p>
+                <div class="meta">
+                  <span id="piquet-version">Version 2</span>
+                  <span id="piquet-date">26 juillet, 10:05</span>
+                </div>
+              </div>
+              <span class="arrow">→</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div class="lower-grid">
+        <section class="panel">
+          <div class="panel-heading">
+            <div><span class="eyebrow">EN DIRECT</span><h2>Activité récente</h2></div>
+            <button class="text-button">Tout voir</button>
+          </div>
+          <div class="activity-list" id="activityList"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div><span class="eyebrow">ACCÈS RAPIDE</span><h2>Ressources</h2></div>
+          </div>
+          <div class="shortcut-grid">
+            <button class="shortcut"><span class="shortcut-icon">📚</span><span class="shortcut-copy"><strong>Documents</strong><small>Procédures et rapports</small></span><span>→</span></button>
+            <button class="shortcut"><span class="shortcut-icon">🧯</span><span class="shortcut-copy"><strong>Safety</strong><small>Consignes et audits</small></span><span>→</span></button>
+            <button class="shortcut"><span class="shortcut-icon">🏛️</span><span class="shortcut-copy"><strong>Plans</strong><small>Bâtiments et installations</small></span><span>→</span></button>
+            <button class="shortcut"><span class="shortcut-icon">☎️</span><span class="shortcut-copy"><strong>Contacts</strong><small>Équipe et entreprises</small></span><span>→</span></button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <span>NEXUS</span>
+      <span>v0.2.0 · Sprint 1</span>
+      <span>Écran tactile · PC · Mobile</span>
+    </footer>
+  </div>
+
+  <div class="modal-backdrop hidden" id="viewerModal">
+    <div class="viewer">
+      <div class="viewer-header">
+        <div>
+          <span class="eyebrow" id="viewerKicker">PLANNING</span>
+          <h2 id="viewerTitle">Planning</h2>
+          <p id="viewerMeta">Août 2026</p>
+        </div>
+        <button class="icon-button" data-close="viewer">×</button>
+      </div>
+      <div class="viewer-content" id="viewerContent"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="uploadModal">
+    <div class="upload">
+      <div class="viewer-header">
+        <div>
+          <span class="eyebrow">PUBLICATION</span>
+          <h2>Nouveau planning</h2>
+          <p>Le planning précédent restera archivé.</p>
+        </div>
+        <button class="icon-button" data-close="upload">×</button>
+      </div>
+
+      <div class="form-body">
+        <label>
+          Type de planning
+          <select id="planningType">
+            <option value="technique">Planning technique</option>
+            <option value="events">Planning événements</option>
+            <option value="piquet">Planning piquet</option>
+          </select>
+        </label>
+
+        <label>
+          Mois
+          <input id="planningMonth" value="Août 2026" />
+        </label>
+
+        <button class="drop-zone" id="dropZone">
+          <span class="drop-icon">⇧</span>
+          <strong id="dropTitle">Déposez le PDF ici</strong>
+          <small id="dropSubtitle">ou touchez pour sélectionner un fichier</small>
+        </button>
+        <input type="file" accept="application/pdf" hidden id="fileInput" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="secondary" data-close="upload">Annuler</button>
+        <button class="primary" id="confirmPublish" disabled>Publier le planning</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULTS = {
+      technique:{title:"Planning technique",icon:"🔧",month:"Août 2026",version:3,author:"Pino",date:"Aujourd’hui, 08:12"},
+      events:{title:"Planning événements",icon:"🎟️",month:"Août 2026",version:1,author:"Nicolas",date:"Hier, 16:40"},
+      piquet:{title:"Planning piquet",icon:"🛟",month:"Août 2026",version:2,author:"Lucien",date:"26 juillet, 10:05"}
+    };
+
+    const activities = [
+      {icon:"📅",title:"Planning technique mis à jour",detail:"Août 2026 · version 3",time:"08:12"},
+      {icon:"🧯",title:"Procédure Safety ajoutée",detail:"Contrôle général des installations",time:"Hier"},
+      {icon:"🎟️",title:"Planning événements publié",detail:"Août 2026 · version 1",time:"Hier"}
+    ];
+
+    let currentFile = null;
+    let plannings = loadPlannings();
+
+    function loadPlannings(){
+      try{
+        return JSON.parse(localStorage.getItem("nexus-plannings")) || structuredClone(DEFAULTS);
+      }catch{
+        return structuredClone(DEFAULTS);
+      }
+    }
+
+    function savePlannings(){
+      localStorage.setItem("nexus-plannings", JSON.stringify(plannings));
+    }
+
+    function updateClock(){
+      const now = new Date();
+      document.getElementById("clockTime").textContent = new Intl.DateTimeFormat("fr-CH",{hour:"2-digit",minute:"2-digit"}).format(now);
+      document.getElementById("clockDate").textContent = new Intl.DateTimeFormat("fr-CH",{weekday:"long",day:"numeric",month:"long"}).format(now);
+      const h = now.getHours();
+      document.getElementById("greeting").textContent = (h<12?"Bonjour":h<18?"Bon après-midi":"Bonsoir") + " 👋";
+    }
+
+    function render(){
+      ["technique","events","piquet"].forEach(id=>{
+        const p = plannings[id];
+        document.getElementById(id+"-month").textContent = p.month;
+        document.getElementById(id+"-version").textContent = "Version " + p.version;
+        const dateEl = document.getElementById(id+"-date");
+        if(dateEl) dateEl.textContent = p.date;
+      });
+      document.getElementById("technique-author").textContent = "Publié par " + plannings.technique.author;
+      renderActivities();
+    }
+
+    function renderActivities(){
+      document.getElementById("activityList").innerHTML = activities.map(a=>`
+        <div class="activity-item">
+          <span class="activity-icon">${a.icon}</span>
+          <div><strong>${a.title}</strong><span>${a.detail}</span></div>
+          <time>${a.time}</time>
+        </div>`).join("");
+    }
+
+    function openDb(){
+      return new Promise((resolve,reject)=>{
+        const req=indexedDB.open("nexus-demo",1);
+        req.onupgradeneeded=()=>{ if(!req.result.objectStoreNames.contains("files")) req.result.createObjectStore("files"); };
+        req.onsuccess=()=>resolve(req.result);
+        req.onerror=()=>reject(req.error);
+      });
+    }
+
+    async function saveFile(key,file){
+      const db=await openDb();
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction("files","readwrite");
+        tx.objectStore("files").put(file,key);
+        tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
+      });
+      db.close();
+    }
+
+    async function getFile(key){
+      const db=await openDb();
+      const file=await new Promise((resolve,reject)=>{
+        const tx=db.transaction("files","readonly");
+        const req=tx.objectStore("files").get(key);
+        req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+      });
+      db.close();return file;
+    }
+
+    async function openPlanning(id){
+      const p=plannings[id];
+      document.getElementById("viewerKicker").textContent = p.icon + " PLANNING";
+      document.getElementById("viewerTitle").textContent = p.title;
+      document.getElementById("viewerMeta").textContent = p.month + " · Version " + p.version;
+      const content=document.getElementById("viewerContent");
+      const file=await getFile(id);
+      if(file){
+        const url=URL.createObjectURL(file);
+        content.innerHTML=`<iframe src="${url}" title="${p.title}"></iframe>`;
+      }else{
+        content.innerHTML=`<div class="empty-viewer"><span>📄</span><h3>Aucun PDF publié pour ce planning</h3><p>Utilisez le bouton « Publier » pour ajouter le premier document.</p><button class="secondary" data-close="viewer">Revenir à l’accueil</button></div>`;
+      }
+      document.getElementById("viewerModal").classList.remove("hidden");
+    }
+
+    document.querySelectorAll("[data-open]").forEach(btn=>btn.addEventListener("click",()=>openPlanning(btn.dataset.open)));
+    document.getElementById("publishBtn").addEventListener("click",()=>document.getElementById("uploadModal").classList.remove("hidden"));
+    document.addEventListener("click",e=>{
+      const close=e.target.closest("[data-close]");
+      if(close) document.getElementById(close.dataset.close+"Modal").classList.add("hidden");
+    });
+
+    const dropZone=document.getElementById("dropZone");
+    const fileInput=document.getElementById("fileInput");
+    dropZone.addEventListener("click",()=>fileInput.click());
+    dropZone.addEventListener("dragover",e=>{e.preventDefault();dropZone.classList.add("dragging")});
+    dropZone.addEventListener("dragleave",()=>dropZone.classList.remove("dragging"));
+    dropZone.addEventListener("drop",e=>{
+      e.preventDefault();dropZone.classList.remove("dragging");
+      acceptFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener("change",()=>acceptFile(fileInput.files[0]));
+
+    function acceptFile(file){
+      if(file && file.type==="application/pdf"){
+        currentFile=file;
+        document.getElementById("dropTitle").textContent=file.name;
+        document.getElementById("dropSubtitle").textContent="PDF prêt à être publié";
+        document.getElementById("confirmPublish").disabled=false;
+      }
+    }
+
+    document.getElementById("confirmPublish").addEventListener("click",async()=>{
+      if(!currentFile)return;
+      const id=document.getElementById("planningType").value;
+      const month=document.getElementById("planningMonth").value.trim() || "Août 2026";
+      await saveFile(id,currentFile);
+      plannings[id].month=month;
+      plannings[id].version+=1;
+      plannings[id].author="Pino";
+      plannings[id].date="À l’instant";
+      savePlannings();
+      activities.unshift({
+        icon:plannings[id].icon,
+        title:plannings[id].title+" mis à jour",
+        detail:month+" · version "+plannings[id].version,
+        time:"À l’instant"
+      });
+      activities.splice(5);
+      currentFile=null;
+      document.getElementById("dropTitle").textContent="Déposez le PDF ici";
+      document.getElementById("dropSubtitle").textContent="ou touchez pour sélectionner un fichier";
+      document.getElementById("confirmPublish").disabled=true;
+      document.getElementById("uploadModal").classList.add("hidden");
+      render();
+    });
+
+    updateClock();
+    setInterval(updateClock,30000);
+    render();
+  </script>
+</body>
+</html>
